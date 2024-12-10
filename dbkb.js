@@ -1,4 +1,101 @@
 javascript:(function () {
+
+    const style = document.createElement("style");
+
+    style.textContent = `
+        #keybindsContainer {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 250px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            z-index: 10000;
+            transform: scale(0.95);
+            transform-origin: top left;
+        }
+
+        #keybindsContainer h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            color: white;
+            text-decoration: underline;
+        }
+
+        #keybindsContainer ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            line-height: 1.8;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+        }
+
+        #keybindsContainer li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+
+        #keybindsContainer li:nth-child(odd) {
+            background-color: rgba(50, 50, 50, 0.2);
+        }
+
+        .keybind-action {
+            color: lightgray;
+            text-align: left;
+        }
+
+        .keybind-group-play {
+            --background-color: #01987533;
+            --foreground-color: #c8f7c5FF;
+        }
+
+        .keybind-group-com {
+            --background-color: #2757d666;
+            --foreground-color: #89CFF0FF;
+        }
+
+        .keybind-group-update {
+            --background-color: #FFD70033;
+            --foreground-color: #D4A017;
+        }
+
+        .keybind-group-reposition {
+            --background-color: #b2353566;
+            --foreground-color: #e4a4a4FF;
+        }
+
+        .keybind-group-deck {
+            --background-color: #5a2c8566;
+            --foreground-color: #C586E5;
+        }
+
+        .keybind-key {
+            background-color: var(--background-color);
+            color: var(--foreground-color);
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-align: center;
+            min-width: 30px;
+            font-size: 20px;
+            line-height: 1;
+            display: inline-block;
+        }
+    `;
+    document.head.appendChild(style);
+
     // Utility function to evaluate XPath and return the first matching element
     function evaluateXPath(xpath) {
         try {
@@ -45,38 +142,17 @@ javascript:(function () {
 
     // Define action groups with associated colors. The background and foreground are for the keybind display.
     const actionGroups = [
-        {
-            actions: playGroup,
-            // Green
-            colors: { background: "#01987533", foreground: "#c8f7c5FF" },
-        },
-        {
-            actions: comGroup,
-            // Blue
-            colors: { background: "#2757d666", foreground: "#89CFF0FF" },
-        },
-        {
-            actions: onBoardUpdateGroup,
-            // Gold
-            colors: { background: "#FFD70033", foreground: "#D4A017" },
-        },
-        {
-            actions: repositionGroup,
-            // Red
-            colors: { background: "#b2353566", foreground: "#e4a4a4FF" },
-        },
-        {
-            actions: deckGroup,
-            // Indigo
-            colors: { background: "#5a2c8566", foreground: "#C586E5" },
-        },
+        { actions: playGroup, cssClass: "keybind-group-play" },
+        { actions: comGroup, cssClass: "keybind-group-com" },
+        { actions: onBoardUpdateGroup, cssClass: "keybind-group-update" },
+        { actions: repositionGroup, cssClass: "keybind-group-reposition" },
+        { actions: deckGroup, cssClass: "keybind-group-deck" },
     ];
 
-    // Flatten actions and map them to their colors
-    const actionToColors = {};
-    actionGroups.forEach(({ actions, colors }) => {
+    const actionToCssClass = {};
+    actionGroups.forEach(({ actions, cssClass }) => {
         actions.flat().forEach((action) => {
-            actionToColors[action] = colors;
+            actionToCssClass[action] = cssClass;
         });
     });
 
@@ -201,76 +277,23 @@ javascript:(function () {
         updateKeybindDisplay();
     }
 
-    // Create the keybind display
-    let keybindsContainer = document.createElement("div");
-    keybindsContainer.style.position = "fixed";
-    keybindsContainer.style.top = "10px";
-    keybindsContainer.style.left = "10px";
-    keybindsContainer.style.width = "250px";
-    keybindsContainer.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
-    keybindsContainer.style.color = "white";
-    keybindsContainer.style.padding = "10px";
-    keybindsContainer.style.borderRadius = "8px";
-    keybindsContainer.style.fontFamily = "Arial, sans-serif";
-    keybindsContainer.style.fontSize = "14px";
-    keybindsContainer.style.zIndex = "10000";
-    keybindsContainer.style.transform = "scale(0.95)";
-    keybindsContainer.style.transformOrigin = "top left";
-
+    // Append container to body
+    const keybindsContainer = document.createElement("div");
+    keybindsContainer.id = "keybindsContainer";
     document.body.appendChild(keybindsContainer);
 
-    // Function to update the keybind display
     function updateKeybindDisplay() {
         let html = `
-            <h3 style="
-                margin: 0 0 10px;
-                font-size: 20px;
-                font-weight: bold;
-                text-align: center;
-                color: white;
-                text-decoration: underline;
-            ">
-                Keybinds
-            </h3>
-            <ul style="
-                list-style: none;
-                padding: 0;
-                margin: 0;
-                line-height: 1.8;
-                font-family: 'Courier New', monospace;
-                font-size: 16px;
-            ">
+            <h3>Keybinds</h3>
+            <ul>
         `;
-        currentMenu.forEach(({ action, key }, index) => {
-            const { background, foreground } = getActionColors(action);
-
-            // Better visual rows with alternating contrast.
-            const rowBackground = index % 2 === 0 ? "rgba(255, 255, 255, 0.1)" : "rgba(50, 50, 50, 0.2)";
+        currentMenu.forEach(({ action, key }) => {
+            const cssClass = actionToCssClass[action] || "";
+    
             html += `
-                <li style="
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    background-color: ${rowBackground};
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    margin-bottom: 4px;
-                ">
-                    <span style="color: lightgray; text-align: left;">${action}</span>
-                    <span style="
-                        background-color: ${background};
-                        color: ${foreground};
-                        font-weight: bold;
-                        padding: 4px 8px;
-                        border-radius: 6px;
-                        text-align: center;
-                        min-width: 30px;
-                        font-size: 20px;
-                        line-height: 1;
-                        display: inline-block;
-                    ">
-                        ${key}
-                    </span>
+                <li class="${cssClass}">
+                    <span class="keybind-action">${action}</span>
+                    <span class="keybind-key">${key}</span>
                 </li>
             `;
         });
