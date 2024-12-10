@@ -43,47 +43,48 @@ javascript:(function () {
         ...deckGroup,
     ];
 
-// Define action groups with associated colors. The background and foreground are for the keybind display.
-const actionGroups = [
-    {
-        actions: playGroup,
-        // Green
-        colors: { background: "#01987533", foreground: "#c8f7c5FF" },
-    },
-    {
-        actions: comGroup,
-        // Blue
-        colors: { background: "#2757d666", foreground: "#89CFF0FF" },
-    },
-    {
-        actions: onBoardUpdateGroup,
-        // Gold
-        colors: { background: "#FFD70033", foreground: "#D4A017" },
-    },
-    {
-        actions: repositionGroup,
-        // Red
-        colors: { background: "#b2353566", foreground: "#e4a4a4FF" },
-    },
-    {
-        actions: deckGroup,
-        // Indigo
-        colors: { background: "#5a2c8566", foreground: "#C586E5" },
-    },
-];
+    // Define action groups with associated colors. The background and foreground are for the keybind display.
+    const actionGroups = [
+        {
+            actions: playGroup,
+            // Green
+            colors: { background: "#01987533", foreground: "#c8f7c5FF" },
+        },
+        {
+            actions: comGroup,
+            // Blue
+            colors: { background: "#2757d666", foreground: "#89CFF0FF" },
+        },
+        {
+            actions: onBoardUpdateGroup,
+            // Gold
+            colors: { background: "#FFD70033", foreground: "#D4A017" },
+        },
+        {
+            actions: repositionGroup,
+            // Red
+            colors: { background: "#b2353566", foreground: "#e4a4a4FF" },
+        },
+        {
+            actions: deckGroup,
+            // Indigo
+            colors: { background: "#5a2c8566", foreground: "#C586E5" },
+        },
+    ];
 
-// Flatten actions and map them to their colors
-const actionToColors = {};
-actionGroups.forEach(({ actions, colors }) => {
-    actions.flat().forEach((action) => {
-        actionToColors[action] = colors;
+    // Flatten actions and map them to their colors
+    const actionToColors = {};
+    actionGroups.forEach(({ actions, colors }) => {
+        actions.flat().forEach((action) => {
+            actionToColors[action] = colors;
+        });
     });
-});
 
-// Function to get colors for a specific action
-function getActionColors(action) {
-    return actionToColors[action] || { background: "rgba(0, 0, 0, 0.2)", foreground: "white" };
-}
+    // Function to get colors for a specific action
+    function getActionColors(action) {
+        return actionToColors[action] || { background: "rgba(0, 0, 0, 0.2)", foreground: "white" };
+    }
+
     const keyActions = {
         q: [
             '//*[@id="card_menu_content"]/div[. = "S. Summon DEF"]',
@@ -160,7 +161,7 @@ function getActionColors(action) {
     function resolveKeybinds() {
         // We only want to show the best-match action available for this card.
         const visibleActions = new Map();
-    
+
         // The key mappings are ordered such that the first we find is the one we should use, the rest are fallbacks.
         Object.entries(keyActions).forEach(([key, xpaths]) => {
             for (const xpath of xpaths) {
@@ -196,7 +197,7 @@ function getActionColors(action) {
             });
     
         console.log("Resolved Current Menu:", currentMenu);
-    
+
         updateKeybindDisplay();
     }
 
@@ -311,17 +312,17 @@ function getActionColors(action) {
 
     document.addEventListener("keypress", function (event) {
         const pressedKey = event.key === " " ? "Space" : event.key.toUpperCase();
-    
+
         // Find the resolved action for the pressed key in `currentMenu`
         const menuEntry = currentMenu.find(({ key }) => key === pressedKey);
 
         if (menuEntry) {
             const action = menuEntry.action;
-    
+
             // Retrieve the specific XPath for the action under the pressed key
             const xpaths = keyActions[event.key] || [];
             const xpath = xpaths.find((xp) => xp.includes(`"${action}"`));
-    
+
             if (xpath) {
                 const element = evaluateXPath(xpath);
                 if (element) {
@@ -331,5 +332,6 @@ function getActionColors(action) {
             }
         }
     });
+
     waitForCardMenu();
 })();
